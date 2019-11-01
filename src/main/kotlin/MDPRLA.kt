@@ -2,6 +2,7 @@ import java.util.*
 import kotlin.collections.HashMap
 import kotlin.math.pow
 import kotlin.reflect.KFunction
+import kotlinx.coroutines.*
 
 class MDPRLA(
     private val discountFactor: Double,
@@ -63,18 +64,31 @@ class MDPRLA(
         println(calculateReturns(rewardValues)[0].toString())
     }
 
-    private fun calculateReturn(rewards: List<Double>): Double { // TODO: Run in threads?
+    fun getReturn() {
+        println("Done! \n${calculateReturn(rewardValues)}")
+    }
+
+    private fun calculateReturn(rewards: List<Double>): Double { // TODO: Run in threads? Seems to slow down computation
         var returnValue = rewards[0]
 
-        return if(rewards.size > 1) {
+        if(rewards.size > 1) {
             for(t in 1 until rewards.size) {
-//                println("returnValue: $returnValue, dc: $dc, t: ${t}, reward: ${rewards[t]}, power: ${dc.pow(t)}, dc * reward: ${dc.pow(t) * rewards[t]}")
-                returnValue += (discountFactor.pow(t) * rewards[t])
+//                    println("returnValue: $returnValue, dc: $discountFactor, t: $t, reward: ${rewards[t]}, power: ${discountFactor.pow(t)}, dc * reward: ${discountFactor.pow(t) * rewards[t]}")
+                    returnValue += (discountFactor.pow(t) * rewards[t])
             }
 
-            returnValue
+//            coroutineScope {
+//                (1 until rewards.size).map {
+//                    async(Dispatchers.Default) {
+////                        println("returnValue: $returnValue, dc: $discountFactor, t: $it, reward: ${rewards[it]}, power: ${discountFactor.pow(it)}, dc * reward: ${discountFactor.pow(it) * rewards[it]}")
+//                        returnValue += discountFactor.pow(it) * rewards[it]
+//                    }
+//                }
+//            }.awaitAll()
+
+            return returnValue
         } else {
-            rewards[0]
+            return rewards[0]
         }
     }
 
@@ -89,12 +103,10 @@ class MDPRLA(
                 val returns = DoubleArray(rewards.size)
 
                 for(t in 0 until returns.size){
-                    val curReturn = calculateReturn(rewards.drop(t))
-                    returns[t] = curReturn
+                    returns[t] = calculateReturn(rewards.drop(t))
 
 //                    println("G[$t] = $curReturn")
                 }
-
                 println("Done!")
 
                 returns

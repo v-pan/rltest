@@ -47,6 +47,8 @@ class RecyclerTask : Task {
         for(i in 0 until steps) {
             rla.chooseNextAction()
         }
-        rla.getReturns()
+        println("Getting return...")
+        rla.getReturn()
+//        println(rla.calculateReturns(listOf(2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0)).joinToString())
     }
 }
