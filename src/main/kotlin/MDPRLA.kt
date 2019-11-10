@@ -13,7 +13,7 @@ class MDPRLA(
 
     private val policy: HashMap<Any, ArrayList<Pair<KFunction<State>, Double>>> = HashMap()
     private val experiences: HashMap<State, ArrayList<Pair<KFunction<State>, Double>>> = HashMap()
-//    private val rewardValues = ArrayList<Double>()
+    private var rewardValues = ArrayList<Double>()
 
     private fun timeStep(action: KFunction<State>?) {
         if(action != null) {
@@ -23,6 +23,8 @@ class MDPRLA(
 
             state = nextState
             actions = state.getActions()
+
+            rewardValues.add(nextState.reward)
         }
     }
 
@@ -77,11 +79,14 @@ class MDPRLA(
 
 //    fun printReturns() {
 //        println(calculateReturns(rewardValues).joinToString())
+//        rewardValues = ArrayList<Double>()
 //    }
 
-//    fun printReturn() {
-//        println("Done! \n${calculateReturn(rewardValues)}")
-//    }
+    fun printReturn() {
+        println("Done! \n${calculateReturn(rewardValues)}")
+
+        rewardValues = ArrayList<Double>()
+    }
 
     fun printStateValues() {
         println(experiences.values.size)

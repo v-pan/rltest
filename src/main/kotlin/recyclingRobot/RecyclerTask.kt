@@ -66,6 +66,7 @@ class RecyclerTask : Task {
             }
 
             rla.greedyNextPolicy()
+            rla.printReturn()
 //            rla.printStateValues()
 //            rla.printStateActionValues()
 //            println(rla.calculateReturns(listOf(2.0, 2.0, 2.0, 2.0)).joinToString())
