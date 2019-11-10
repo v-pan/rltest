@@ -64,11 +64,9 @@ class RecyclerTask : Task {
             for(i in 0 until steps) {
                 rla.chooseNextAction()
             }
-            println("Getting return...")
 
-            rla.printReturn()
-//            rla.printReturns()
             rla.printStateValues()
+            rla.printStateActionValues()
 //            println(rla.calculateReturns(listOf(2.0, 2.0, 2.0, 2.0)).joinToString())
 
             println("Keep running? Y/N")

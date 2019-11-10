@@ -12,21 +12,24 @@ class MDPRLA(
 
     private val policy: HashMap<Any, ArrayList<Pair<KFunction<State>, Double>>> = HashMap()
     private val experiences: HashMap<State, ArrayList<Pair<KFunction<State>, Double>>> = HashMap()
-    private val rewardValues = ArrayList<Double>()
+//    private val rewardValues = ArrayList<Double>()
 
     private fun timeStep(action: KFunction<State>?) {
         if(action != null) {
-            state = action.call(state)
+            val nextState = action.call(state)
 
             if(experiences[state] == null){
-                experiences[state] = arrayListOf(Pair(action, state.reward))
+                experiences[state] = arrayListOf(Pair(action, nextState.reward))
             } else {
-                experiences[state]!!.add(Pair(action, state.reward))
+                experiences[state]!!.add(Pair(action, nextState.reward))
             }
-        }
 
-        rewardValues.add(state.reward)
-        actions = state.getActions()
+//            rewardValues.add(nextState.reward)
+            state = nextState
+            actions = state.getActions()
+
+//            println("Reward: $rewardValues")
+        }
     }
 
     fun chooseNextAction() {
@@ -50,32 +53,55 @@ class MDPRLA(
         }
     }
 
-    fun printReturns() {
-        println(calculateReturns(rewardValues).joinToString())
-    }
+//    fun printReturns() {
+//        println(calculateReturns(rewardValues).joinToString())
+//    }
 
-    fun printReturn() {
-        println("Done! \n${calculateReturn(rewardValues)}")
-    }
+//    fun printReturn() {
+//        println("Done! \n${calculateReturn(rewardValues)}")
+//    }
 
     fun printStateValues() {
-        println("State, Value pairs: ${estimateStateValues().joinToString()}")
+        println(experiences.values.size)
+        println("State value estimations: ${estimateStateValues()}")
+    }
+
+    fun printStateActionValues() {
+        println("State/Action value estimations: ${estimateStateActionValues()}")
     }
 
     private fun estimateStateValues(): ArrayList<Pair<State, Double>> {
         val pairs = ArrayList<Pair<State, Double>>()
 
-        experiences.forEach { (state, valuePairs) ->
-            var sumReward = 0.0
+        experiences.forEach { (state, actionPairs) ->
+            val rewardArray = DoubleArray(actionPairs.size)
 
-            valuePairs.forEach { (_, reward) ->
-                sumReward += reward
+            actionPairs.forEachIndexed { index, (_, reward) ->
+                rewardArray[index] = reward
             }
 
-            pairs.add(Pair(state, sumReward / valuePairs.size))
+            pairs.add(Pair(state, calculateReturn(rewardArray.asList())))
         }
 
         return pairs
+    }
+
+    private fun estimateStateActionValues(): HashMap<State, ArrayList<Pair<KFunction<State>, Double>>> {
+        val result = HashMap<State, ArrayList<Pair<KFunction<State>, Double>>>()
+
+        experiences.forEach { (state, pairs) ->
+            val actionRewards = HashMap<KFunction<State>, java.util.ArrayList<Double>>()
+
+            pairs.forEach { (action, reward) ->
+                actionRewards[action]?.add(reward) ?: actionRewards.put(action, arrayListOf(reward))
+            }
+
+            actionRewards.forEach { (action, rewards) ->
+                result[state]?.add(Pair(action, calculateReturn(rewards))) ?: result.put(state, arrayListOf(Pair(action, calculateReturn(rewards))))
+            }
+        }
+
+        return result
     }
 
     private fun calculateReturn(rewards: List<Double>): Double { // TODO: Run in threads? Seems to slow down computation
