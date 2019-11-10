@@ -42,7 +42,6 @@
       <change beforePath="$PROJECT_DIR$/build/kotlin/compileKotlin/caches-jvm/lookups/lookups.tab_i" beforeDir="false" afterPath="$PROJECT_DIR$/build/kotlin/compileKotlin/caches-jvm/lookups/lookups.tab_i" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/kotlin/compileKotlin/last-build.bin" beforeDir="false" afterPath="$PROJECT_DIR$/build/kotlin/compileKotlin/last-build.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/MDPRLA.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/MDPRLA.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/Task.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/Task.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/recyclingRobot/RecyclerTask.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/recyclingRobot/RecyclerTask.kt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />

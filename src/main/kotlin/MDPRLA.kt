@@ -1,3 +1,4 @@
+import java.lang.Error
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -18,17 +19,10 @@ class MDPRLA(
         if(action != null) {
             val nextState = action.call(state)
 
-            if(experiences[state] == null){
-                experiences[state] = arrayListOf(Pair(action, nextState.reward))
-            } else {
-                experiences[state]!!.add(Pair(action, nextState.reward))
-            }
+            experiences[state]?.add(Pair(action, nextState.reward)) ?: experiences.put(state, arrayListOf(Pair(action, nextState.reward)))
 
-//            rewardValues.add(nextState.reward)
             state = nextState
             actions = state.getActions()
-
-//            println("Reward: $rewardValues")
         }
     }
 
@@ -51,6 +45,34 @@ class MDPRLA(
                 break
             }
         }
+    }
+
+    fun greedyNextPolicy() {
+        val stateValues = estimateStateActionValues()
+
+        var highestReturn: Pair<KFunction<State>, Double>? = null
+        stateValues[state]?.forEach { actionPair ->
+            if(highestReturn == null) {
+                highestReturn = actionPair
+            } else {
+                if(highestReturn!!.second < actionPair.second) {
+                    highestReturn = actionPair
+                }
+            }
+        } ?: throw Error("No value for state!")
+
+        println("Optimising (greedily) for ${highestReturn!!.first.name}...")
+
+        val newPolicy = policy[state.value]!!.map { pair ->
+            if(pair.first == highestReturn!!.first) {
+                Pair(pair.first, 1.0)
+            } else {
+                Pair(pair.first, 0.0)
+            }
+        }
+
+        println("New policy for $state:\n $newPolicy")
+        policy[state.value] = ArrayList(newPolicy)
     }
 
 //    fun printReturns() {
