@@ -44,11 +44,13 @@ class RecyclerTask : Task {
     override fun start() {
         println("Run for how many steps?")
         val steps = readLine()!!.toInt()
+        println("Running...")
         for(i in 0 until steps) {
             rla.chooseNextAction()
         }
         println("Getting return...")
-        rla.getReturn()
-//        println(rla.calculateReturns(listOf(2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0)).joinToString())
+        rla.printReturn()
+        rla.printReturns()
+//        println(rla.calculateReturns(listOf(2.0, 2.0, 2.0, 2.0)).joinToString())
     }
 }
