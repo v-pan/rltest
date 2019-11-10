@@ -1,11 +1,23 @@
-import recyclingRobot.RecyclerState
 import java.util.ArrayList
 import kotlin.reflect.KFunction
 
-interface State {
-    val task: Task
-    var value: Any
-    val reward: Double
+abstract class State {
+    abstract val task: Task
+    abstract var value: Any
+    abstract val reward: Double
 
-    fun getActions(): ArrayList<KFunction<State>>
+    abstract fun getActions(): ArrayList<KFunction<State>>
+    override fun equals(other: Any?): Boolean {
+        return if(other is State) {
+            value == other.value && task === other.task
+        } else {
+            false
+        }
+    }
+
+    override fun hashCode(): Int {
+        var result = task.hashCode()
+        result = 31 * result + value.hashCode()
+        return result
+    }
 }

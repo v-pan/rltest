@@ -1,4 +1,5 @@
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.math.pow
 import kotlin.reflect.KFunction
@@ -10,7 +11,7 @@ class MDPRLA(
 ) {
 
     private val policy: HashMap<Any, ArrayList<Pair<KFunction<State>, Double>>> = HashMap()
-    private val experiences: HashMap<State, ArrayList<ActionValuePair>> = HashMap()
+    private val experiences: HashMap<State, ArrayList<Pair<KFunction<State>, Double>>> = HashMap()
     private val rewardValues = ArrayList<Double>()
 
     private fun timeStep(action: KFunction<State>?) {
@@ -18,9 +19,9 @@ class MDPRLA(
             state = action.call(state)
 
             if(experiences[state] == null){
-                experiences[state] = arrayListOf(ActionValuePair(action, state.reward))
+                experiences[state] = arrayListOf(Pair(action, state.reward))
             } else {
-                experiences[state]!!.add(ActionValuePair(action, state.reward))
+                experiences[state]!!.add(Pair(action, state.reward))
             }
         }
 
@@ -55,6 +56,26 @@ class MDPRLA(
 
     fun printReturn() {
         println("Done! \n${calculateReturn(rewardValues)}")
+    }
+
+    fun printStateValues() {
+        println("State, Value pairs: ${estimateStateValues().joinToString()}")
+    }
+
+    private fun estimateStateValues(): ArrayList<Pair<State, Double>> {
+        val pairs = ArrayList<Pair<State, Double>>()
+
+        experiences.forEach { (state, valuePairs) ->
+            var sumReward = 0.0
+
+            valuePairs.forEach { (_, reward) ->
+                sumReward += reward
+            }
+
+            pairs.add(Pair(state, sumReward / valuePairs.size))
+        }
+
+        return pairs
     }
 
     private fun calculateReturn(rewards: List<Double>): Double { // TODO: Run in threads? Seems to slow down computation
