@@ -16,7 +16,7 @@ class RecyclerTask : Task {
     // For simulating environment dynamics
     private val random = Random
 
-    override val rla = MDPRLA(0.5, RecyclerState(2, 0.0, this))
+    override val rla = MDPRLA(discountFactor = 0.9, state = RecyclerState(2, 0.0, this))
 
     fun searchAction(state: RecyclerState): RecyclerState {
         val p = random.nextDouble()
@@ -67,9 +67,6 @@ class RecyclerTask : Task {
 
             rla.greedyNextPolicy()
             rla.printReturn()
-//            rla.printStateValues()
-//            rla.printStateActionValues()
-//            println(rla.calculateReturns(listOf(2.0, 2.0, 2.0, 2.0)).joinToString())
 
             println("Keep running? Y/N")
             val continueInput = readLine()!!.toUpperCase()
