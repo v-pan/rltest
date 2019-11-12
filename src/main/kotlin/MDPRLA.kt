@@ -52,14 +52,12 @@ class MDPRLA(
 
     fun nextPolicyNormalised() {
         experiences.keys.forEach { state ->
-            println("Generating for $state, ${experiences[state]}...")
             generateNormalisedPolicy(state)
         }
     }
 
     fun nextPolicyGreedy() {
         experiences.keys.forEach { state ->
-            println("Generating for $state...")
             generateGreedyPolicy(state)
         }
     }
