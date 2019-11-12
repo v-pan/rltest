@@ -65,7 +65,7 @@ class RecyclerTask : Task {
                 rla.chooseNextAction()
             }
 
-            rla.greedyNextPolicy()
+            rla.normalisedNextPolicy()
             rla.printReturn()
 
             println("Keep running? Y/N")

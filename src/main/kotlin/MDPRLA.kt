@@ -2,6 +2,7 @@ import java.lang.Error
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.math.absoluteValue
 import kotlin.math.pow
 import kotlin.reflect.KFunction
 
@@ -49,11 +50,49 @@ class MDPRLA(
         }
     }
 
-    fun greedyNextPolicy() {
+    fun normalisedNextPolicy(targetState: State = state) {
+        val stateValues = estimateStateActionValues()
+
+        var lowest = 0.0
+        var newProbabilities: List<Double> = stateValues[targetState]?.map { (_, value) ->
+            if(value < 0) {
+                if(value <= lowest) {
+                    lowest = value
+                }
+            }
+            value
+        } ?: throw Error("No value for state!")
+
+        println("Pre-bump probs: $newProbabilities")
+
+        lowest = lowest.absoluteValue
+        newProbabilities = newProbabilities.map {
+            it + lowest
+        }
+
+        println("New probs: $newProbabilities")
+
+        val sum = newProbabilities.sum()
+        newProbabilities = newProbabilities.map {
+            it / sum
+        }
+
+        println("Normal probs: $newProbabilities")
+
+        println("Old policy: ${policy[targetState.value]}")
+        val newPolicy = policy[targetState.value]?.mapIndexed { index, pair ->
+            Pair(pair.first, newProbabilities[index])
+        } ?: throw Error("No policy entry for state!")
+
+        println("New policy $newPolicy")
+        policy[targetState.value] = ArrayList(newPolicy)
+    }
+
+    fun greedyNextPolicy(targetState: State = state) {
         val stateValues = estimateStateActionValues()
 
         var highestReturn: Pair<KFunction<State>, Double>? = null
-        stateValues[state]?.forEach { actionPair ->
+        stateValues[targetState]?.forEach { actionPair ->
             if(highestReturn == null) {
                 highestReturn = actionPair
             } else {
@@ -65,16 +104,16 @@ class MDPRLA(
 
         println("Optimising (greedily) for ${highestReturn!!.first.name}...")
 
-        val newPolicy = policy[state.value]!!.map { pair ->
+        val newPolicy = policy[targetState.value]?.map { pair ->
             if(pair.first == highestReturn!!.first) {
                 Pair(pair.first, 1.0)
             } else {
                 Pair(pair.first, 0.0)
             }
-        }
+        } ?: throw Error("No policy entry for state!")
 
-        println("New policy for $state:\n $newPolicy")
-        policy[state.value] = ArrayList(newPolicy)
+        println("New policy for $targetState:\n $newPolicy")
+        policy[targetState.value] = ArrayList(newPolicy)
     }
 
 //    fun printReturns() {
