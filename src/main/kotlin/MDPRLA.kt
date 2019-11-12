@@ -50,7 +50,19 @@ class MDPRLA(
         }
     }
 
-    fun normalisedNextPolicy(targetState: State = state) {
+    fun nextPolicyNormalised() {
+        experiences.keys.forEach { state ->
+            generateNormalisedPolicy(state)
+        }
+    }
+
+    fun nextPolicyGreedy() {
+        experiences.keys.forEach { state ->
+            generateGreedyPolicy(state)
+        }
+    }
+
+    private fun generateNormalisedPolicy(targetState: State = state) {
         val stateValues = estimateStateActionValues()
 
         var lowest = 0.0
@@ -63,32 +75,26 @@ class MDPRLA(
             value
         } ?: throw Error("No value for state!")
 
-        println("Pre-bump probs: $newProbabilities")
-
         lowest = lowest.absoluteValue
         newProbabilities = newProbabilities.map {
             it + lowest
         }
-
-        println("New probs: $newProbabilities")
 
         val sum = newProbabilities.sum()
         newProbabilities = newProbabilities.map {
             it / sum
         }
 
-        println("Normal probs: $newProbabilities")
-
         println("Old policy: ${policy[targetState.value]}")
         val newPolicy = policy[targetState.value]?.mapIndexed { index, pair ->
             Pair(pair.first, newProbabilities[index])
         } ?: throw Error("No policy entry for state!")
 
-        println("New policy $newPolicy")
+        println("New policy for $targetState:\n $newPolicy")
         policy[targetState.value] = ArrayList(newPolicy)
     }
 
-    fun greedyNextPolicy(targetState: State = state) {
+    private fun generateGreedyPolicy(targetState: State = state) {
         val stateValues = estimateStateActionValues()
 
         var highestReturn: Pair<KFunction<State>, Double>? = null

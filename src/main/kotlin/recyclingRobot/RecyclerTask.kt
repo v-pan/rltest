@@ -65,8 +65,8 @@ class RecyclerTask : Task {
                 rla.chooseNextAction()
             }
 
-            rla.normalisedNextPolicy()
             rla.printReturn()
+            rla.nextPolicyNormalised()
 
             println("Keep running? Y/N")
             val continueInput = readLine()!!.toUpperCase()
