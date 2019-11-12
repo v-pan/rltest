@@ -77,6 +77,12 @@ class MDPRLA(
             value
         } ?: throw Error("No value for state!")
 
+        if(policy[targetState.value]?.size != newProbabilities.size) {
+            println("OUT OF BOUNDS")
+
+            return
+        }
+
         lowest = lowest.absoluteValue
         newProbabilities = newProbabilities.map {
             it + lowest
@@ -89,14 +95,9 @@ class MDPRLA(
             }
         }
 
-        val newPolicy = if(policy[targetState.value]?.size == newProbabilities.size) {
-            policy[targetState.value]?.mapIndexed { index, pair ->
-                Pair(pair.first, newProbabilities[index])
-            } ?: throw Error("No policy entry for state!")
-
-        } else {
-            policy[targetState.value] ?: throw Error("No policy entry for state!")
-        }
+        val newPolicy = policy[targetState.value]?.mapIndexed { index, pair ->
+            Pair(pair.first, newProbabilities[index])
+        } ?: throw Error("No policy entry for state!")
 
         println("New policy for $targetState:\n $newPolicy")
         policy[targetState.value] = ArrayList(newPolicy)
