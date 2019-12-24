@@ -13,6 +13,6 @@ class RecyclerState(energyLevel: Int, override val reward: Double, override val 
     }
 
     override fun toString(): String {
-        return "Energy level: $value"
+        return "$value"
     }
 }

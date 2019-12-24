@@ -5,6 +5,7 @@ abstract class State {
     abstract val task: Task
     abstract var value: Any
     abstract val reward: Double
+//    abstract val parent: State?
 
     abstract fun getActions(): ArrayList<KFunction<State>>
     override fun equals(other: Any?): Boolean {
