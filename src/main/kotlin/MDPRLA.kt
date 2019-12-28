@@ -1,4 +1,3 @@
-import java.math.BigDecimal
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -13,25 +12,33 @@ class MDPRLA(
     private val policy: HashMap<State, MutableMap<KFunction<State>, Double>> = HashMap()
 
     val stateValues = mutableMapOf<State, Double>()
-    private val stateActionGraph = mutableMapOf<StateActionNode, Int>()
+    private val stateActionExperiences = mutableMapOf<StateActionNode, Int>()
 
     private fun timeStep(action: KFunction<State>?) {
         if (action != null) {
             val nextState = action.call(state)
             val node = StateActionNode(state, action, nextState)
-            val totalOccurrences = stateActionGraph.values.sum()
+            val totalOccurrences = stateActionExperiences.values.sum()
 
 
-            stateActionGraph.putIfAbsent(node, 0)
-            stateActionGraph[node] = stateActionGraph[node]!! + 1
+            stateActionExperiences.putIfAbsent(node, 0)
+            stateActionExperiences[node] = stateActionExperiences[node]!! + 1
 
             if(totalOccurrences != 0) {
                 if (stateValues[nextState] != null) {
-                    println("(${(stateActionGraph[node]!!.toDouble() / totalOccurrences.toDouble())}) * (${state.reward} + ($discountFactor * ${stateValues[nextState]}))")
-                    stateValues[state] = (stateActionGraph[node]!!.toDouble() / totalOccurrences.toDouble()) * state.reward + (discountFactor * stateValues[nextState]!!)
+                    println("(${(stateActionExperiences[node]!!.toDouble() / totalOccurrences.toDouble())}) * (${state.reward} + ($discountFactor * ${stateValues[nextState]}))")
+                    stateValues[state] = (stateActionExperiences[node]!!.toDouble() / totalOccurrences.toDouble()) * state.reward + (discountFactor * stateValues[nextState]!!)
                 } else {
-                    println("(${(stateActionGraph[node]!!.toDouble() / totalOccurrences.toDouble())}) * (${state.reward} + ($discountFactor * ${stateValues[nextState]}))")
-                    stateValues[state] = (stateActionGraph[node]!!.toDouble() / totalOccurrences.toDouble()) * (state.reward + (discountFactor * nextState.reward)) // policy[state]!![action]!! *
+                    println("(${(stateActionExperiences[node]!!.toDouble() / totalOccurrences.toDouble())}) * (${state.reward} + ($discountFactor * ${nextState.reward}))")
+                    stateValues[state] = (stateActionExperiences[node]!!.toDouble() / totalOccurrences.toDouble()) * (state.reward + (discountFactor * nextState.reward)) // policy[state]!![action]!! *
+                }
+            } else {
+                if (stateValues[nextState] != null) {
+                    println("(${state.reward} + ($discountFactor * ${stateValues[nextState]}))")
+                    stateValues[state] = state.reward + (discountFactor * stateValues[nextState]!!)
+                } else {
+                    println("(${state.reward} + ($discountFactor * ${nextState.reward}))")
+                    stateValues[state] = (state.reward + (discountFactor * nextState.reward)) // policy[state]!![action]!! *
                 }
             }
 
@@ -62,12 +69,12 @@ class MDPRLA(
     }
 
     fun stateActionValues(): MutableMap<StateActionNode, Double> {
-        val totalOccurrences = stateActionGraph.values.sum()
+        val totalOccurrences = stateActionExperiences.values.sum()
 
-        return stateActionGraph.map { (stateActionNode, occurrences) ->
+        return stateActionExperiences.map { (stateActionNode, occurrences) ->
             if(stateValues[stateActionNode.nextState] == null) {
-//                stateActionNode to 0.0
-                throw KotlinNullPointerException()
+                stateActionNode to 0.0
+//                throw KotlinNullPointerException()
             } else {
                 stateActionNode to (occurrences.toDouble() / totalOccurrences.toDouble()) * stateValues[stateActionNode.nextState]!!
             }
