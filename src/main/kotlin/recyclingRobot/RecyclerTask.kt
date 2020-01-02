@@ -7,36 +7,34 @@ import kotlin.random.Random
 import kotlin.reflect.KFunction
 
 class RecyclerTask : Task {
-    override val actionTable: HashMap<Any, ArrayList<KFunction<State>>> = hashMapOf(
-        Pair<Int, ArrayList<KFunction<State>>>(0, ArrayList()),
-        Pair<Int, ArrayList<KFunction<State>>>(1, arrayListOf(::searchAction, ::waitAction, ::rechargeAction)),
-        Pair<Int, ArrayList<KFunction<State>>>(2, arrayListOf(::searchAction, ::waitAction))
+    private val actionTable: HashMap<Int, List<KFunction<State>>> = hashMapOf(
+        Pair(0, listOf()),
+        Pair(1, listOf<KFunction<State>>(::searchAction, ::waitAction, ::rechargeAction)),
+        Pair(2, listOf<KFunction<State>>(::searchAction, ::waitAction))
     )
 
-    // For simulating environment dynamics
-    private val random = Random
+    private val random = Random     // For simulating environment dynamics
 
     override val rla = MDPRLA(discountFactor = 0.9, state = RecyclerState(2, 0.0, this))
+
+    override fun getActions(state: State): List<KFunction<State>> {
+        return actionTable[state.value] ?: throw IndexOutOfBoundsException()
+    }
 
     fun searchAction(state: RecyclerState): RecyclerState {
         val p = random.nextDouble()
 
-//        println("Searching...")
-
         return if(p < 0.3) {
 //            println("Battery level not reduced ${state.value}, reward: 2.0\n")
-
-            RecyclerState(state.value as Int, 2.0, this) // Battery not reduced
+            RecyclerState(state.value as Int, 2.0, this)
         } else {
             val newLevel = state.value as Int - 1
             if(newLevel > 0) {
 //                println("Battery level reduced ${state.value as Int - 1}, reward: 2.0\n")
-
-                RecyclerState(newLevel, 2.0, this) // Battery reduced
+                RecyclerState(newLevel, 2.0, this)
             } else {
 //                println("Battery level ran out, reward: -3.0\n")
-
-                RecyclerState(2, -3.0, this) // Ran out of battery
+                RecyclerState(2, -3.0, this)
             }
         }
     }
@@ -53,10 +51,10 @@ class RecyclerTask : Task {
 
     override fun start() {
         while (true) {
-            println("Run for how many steps? (Default: 1000)")
+            println("Run for how many steps? (Default: 1000000)")
             val stepsInput = readLine()
             val steps = if(stepsInput == "") {
-                1000
+                1000000
             } else {
                 stepsInput!!.toInt()
             }

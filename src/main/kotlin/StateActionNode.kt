@@ -3,7 +3,7 @@ import kotlin.reflect.KFunction
 data class StateActionNode(val state: State, val action: KFunction<State>, val nextState: State) {
     override fun equals(other: Any?): Boolean {
         return if(other is StateActionNode) {
-            state == other.state && action === other.action && nextState == nextState
+            state == other.state && action === other.action && nextState == other.nextState
         } else {
 
             false
