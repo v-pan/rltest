@@ -7,66 +7,55 @@ import kotlin.random.Random
 import kotlin.reflect.KFunction
 
 class RecyclerTask : Task {
-    override val actionTable: HashMap<Any, ArrayList<KFunction<State>>> = hashMapOf(
-        Pair<Int, ArrayList<KFunction<State>>>(0, ArrayList()),
-        Pair<Int, ArrayList<KFunction<State>>>(1, arrayListOf(::searchAction, ::waitAction, ::rechargeAction)),
-        Pair<Int, ArrayList<KFunction<State>>>(2, arrayListOf(::searchAction, ::waitAction))
-    )
-
     // For simulating environment dynamics
     private val random = Random
 
-    override val rla = MDPRLA(discountFactor = 0.9, state = RecyclerState(2, 0.0, this))
+    override val rla = MDPRLA(discountFactor = 0.5, state = RecyclerState(2, 0.0), task = this)
+    private var searchCount = 0
 
     fun searchAction(state: RecyclerState): RecyclerState {
-        val p = random.nextDouble()
+        return if (searchCount == 2) {
+            searchCount = 0
+            val newLevel = state.value - 1
 
-//        println("Searching...")
-
-        return if(p < 0.3) {
-//            println("Battery level not reduced ${state.value}, reward: 2.0\n")
-
-            RecyclerState(state.value as Int, 2.0, this) // Battery not reduced
-        } else {
-            val newLevel = state.value as Int - 1
-            if(newLevel > 0) {
-//                println("Battery level reduced ${state.value as Int - 1}, reward: 2.0\n")
-
-                RecyclerState(newLevel, 2.0, this) // Battery reduced
+            if (newLevel > 0) {
+                RecyclerState(newLevel, 2.0) // Battery reduced
             } else {
-//                println("Battery level ran out, reward: -3.0\n")
-
-                RecyclerState(2, -3.0, this) // Ran out of battery
+                RecyclerState(2, -3.0) // Ran out of battery
             }
+        } else {
+            searchCount++
+            RecyclerState(state.value, 2.0) // Battery not reduced
         }
     }
 
     fun waitAction(state: RecyclerState): RecyclerState {
 //        println("Waiting...\n Battery level ${state.value}, reward: 1.0\n")
-        return RecyclerState(state.value as Int, 1.0, this)
+        return RecyclerState(state.value, 1.0)
     }
 
     fun rechargeAction(state: RecyclerState): RecyclerState {
 //        println("Recharging...\n Battery level: 2.0, reward: 0.0\n")
-        return RecyclerState(2, 0.0, this)
+        searchCount = 0
+        return RecyclerState(2, 0.0)
     }
 
     override fun start() {
         while (true) {
-            println("Run for how many steps? (Default: 1000)")
+            println("Run for how many steps? (Default: 10000)")
             val stepsInput = readLine()
             val steps = if(stepsInput == "") {
-                1000
+                10000
             } else {
                 stepsInput!!.toInt()
             }
             println("Running...")
             for(i in 0 until steps) {
-                rla.chooseNextAction()
+                rla.act()
             }
-            rla.nextPolicyNormalised()
+//            rla.nextPolicyNormalised()
 
-            rla.printReturn()
+//            rla.printReturn()
 
             println("Keep running? Y/N")
             val continueInput = readLine()!!.toUpperCase()
