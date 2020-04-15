@@ -1,6 +1,6 @@
 package recyclingRobot
 
-import State
+import data.State
 import kotlin.reflect.KFunction
 
 class RecyclerState(energyLevel: Int, override val reward: Double) : State() {

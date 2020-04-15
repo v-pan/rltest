@@ -5,6 +5,6 @@ fun main() {
     val blackjack = BlackjackTask()
     blackjack.run{
         start()
-        rla.improvePolicy(0.5)
+        rla.improvePolicy()
     }
 }

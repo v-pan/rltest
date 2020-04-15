@@ -1,6 +1,6 @@
 package blackjack
 
-import State
+import data.State
 import kotlin.reflect.KFunction
 
 /*

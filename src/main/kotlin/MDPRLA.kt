@@ -14,15 +14,19 @@ class MDPRLA(
     private var actions: List<Action> = state.getActions()
 ) {
 
-    private var policy: Policy = mutableMapOf()
+    private var behaviourPolicy: Policy = mutableMapOf()
+    private var targetPolicy: Policy? = null
     private val experiences: Episode = mutableListOf()
 
-    fun act() = timeStep(chooseAction(state, policy))
+    fun act() = timeStep(chooseAction(state, behaviourPolicy))
     fun improvePolicy(temperature: Double = 1.0) {
-        val targetPolicy = createTargetPolicy(experiences, temperature)
+        targetPolicy = experiences.toStateActionWeightedValueMap(
+            discountFactor,
+            targetPolicy = targetPolicy ?: behaviourPolicy,
+            basePolicy = behaviourPolicy
+        ).asStateActionDoubleMap().toPolicy(temperature)
 
-        policy = targetPolicy
-        println("New policy:\n $targetPolicy")
+        println("New target policy:\n ${targetPolicy!!.map { (stateValue, actionPair) -> stateValue to actionPair.map { (action, value) -> action to value }.joinToString { (action, value) -> "${action.name}=$value" } }.joinToString { (stateValue, actionString) -> "$stateValue={$actionString}" }}")
     }
 
     private fun timeStep(action: Action?) {
@@ -58,35 +62,5 @@ class MDPRLA(
 
             action
         }
-    }
-
-    private fun createTargetPolicy(episode: Episode, temperature: Double): Policy {
-        val stateActionValues: SAVDoubleMap =
-            episode.toStateActionWeightedValueMap(discountFactor, targetPolicy = policy, basePolicy = policy)
-            .asStateActionDoubleMap()
-
-        val targetPolicy: Policy = mutableMapOf()
-
-        // Soft-max
-        val e = 2.718281828459045235360287471352662497757247093699959574966
-        stateActionValues.forEach { (stateAction, value) ->
-            val (state, action) = stateAction
-
-            targetPolicy.putIfAbsent(state.value, mutableMapOf())
-            targetPolicy[state.value]!![action] = (value)
-        }
-
-        return targetPolicy.map { (state, actionMap) ->
-            var total = 0.0
-            val finalMap = actionMap.map { (action, value) ->
-                val eValue = e.pow(value / temperature)
-                total += eValue
-                action to eValue
-            }.map { (action, eValue) ->
-                action to eValue / total
-            }
-
-            state to finalMap.toMap().toMutableMap()
-        }.toMap().toMutableMap()
     }
 }

@@ -1,10 +1,8 @@
 package recyclingRobot
 
-import Task
-import State
 import MDPRLA
+import data.Task
 import kotlin.random.Random
-import kotlin.reflect.KFunction
 
 class RecyclerTask : Task {
     // For simulating environment dynamics

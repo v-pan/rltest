@@ -1,7 +1,7 @@
 package blackjack
 
 import MDPRLA
-import Task
+import data.Task
 
 class BlackjackTask : Task {
     override var rla = MDPRLA(0.5, BlackjackState(listOf((1 .. 13).random(), (1 .. 13).random()), 0.0), this)
@@ -44,9 +44,11 @@ class BlackjackTask : Task {
         for(i in 0 until games) {
             rla.act()
             if(lost) {
-              lost = false
+                lost = false
+//                rla.improvePolicy()
             } else if (won) {
-              winCount++
+                winCount++
+//                rla.improvePolicy()
             }
         }
 //        test()
