@@ -14,7 +14,6 @@ class BlackjackTask : Task {
             lost = true
             BlackjackState(listOf((1 .. 13).random(), (1 .. 13).random()), -1.0)
         } else {
-            println("still under")
             newState
         }
     }
@@ -39,38 +38,51 @@ class BlackjackTask : Task {
         } else {
             input!!.toInt()
         }
-        println("---------------------------------------------------")
-        println(rla.state.toString())
+
+        println("Playing...")
+
         for(i in 0 until games) {
-            println("Playing...")
             rla.act()
             if(lost) {
-                println("lost!")
-                println("---------------------------------------------------")
-                lost = false
+              lost = false
             } else if (won) {
-                println("won!")
-                println("---------------------------------------------------")
-
-                won = false
-                winCount++
-            }
-//            rla.nextPolicyNormalised()
-            if(i != games-1) {
-                println(rla.state.toString())
+              winCount++
             }
         }
-        println("Won $winCount, lost ${(games - winCount)} of $games games")
-        println()
-        println("Policy for 20: ${rla.policy[20]}")
-        if(rla.policy[20] != null) {
-            println(rla.chooseAction(20)?.name)
-            println(rla.chooseAction(20)?.name)
-            println(rla.chooseAction(20)?.name)
+//        test()
+//        rla.improvePolicy()
+        println("Finished round 1, test result? y/n")
+        if(readLine() == "y") {
+            var keepTesting = true
+            while(keepTesting) {
+                test()
+                println("Test again, or train? y/t/n")
+                val ans = readLine()
+                keepTesting = (ans == "y")
+                if(ans == "t") {
+                    rla.improvePolicy()
+                    keepTesting = true
+                }
+            }
+        } else {
+            return
         }
     }
 
-    fun test(){
+    private fun test() {
+        var winCount = 0
+        val games = 10000
 
+        println("Testing...")
+        for(i in 0 until games) {
+            rla.act()
+            if(lost) {
+                lost = false
+            } else if (won) {
+                won = false
+                winCount++
+            }
+        }
+        println("Won $winCount (${(winCount.toDouble() / games.toDouble()) * 100}%), lost ${(games - winCount)} of $games games")
     }
 }

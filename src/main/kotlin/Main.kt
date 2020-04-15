@@ -1,10 +1,10 @@
 import blackjack.BlackjackTask
-import recyclingRobot.RecyclerState
 import recyclingRobot.RecyclerTask
 
 fun main() {
-    BlackjackTask().run{
+    val blackjack = BlackjackTask()
+    blackjack.run{
         start()
-        println(rla.mapStateToValue())
+        rla.improvePolicy(0.5)
     }
 }

@@ -1,73 +1,91 @@
-import java.lang.Error
-import java.lang.Exception
+import data.*
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import kotlin.math.absoluteValue
 import kotlin.math.pow
 import kotlin.reflect.KFunction
 
 typealias StateValue = Any
+typealias Action = KFunction<State>
+typealias Policy = MutableMap<StateValue, MutableMap<Action, Double>>
 
 class MDPRLA(
     private val discountFactor: Double,
-    var state: State,
+    private var state: State,
     private val task: Task,
-    private var actions: List<KFunction<State>> = state.getActions(),
-    val policy: MutableMap<StateValue, MutableMap<KFunction<State>, Double>> = mutableMapOf()
+    private var actions: List<Action> = state.getActions()
 ) {
 
-    private val experiences: MutableList<Pair<StateValue, Pair<KFunction<State>, Double>>> = mutableListOf() // Chronological list of experiences, and rewards
-    private var rewardValues = mutableListOf<Double>()
+    private var policy: Policy = mutableMapOf()
+    private val experiences: Episode = mutableListOf()
 
-    private fun timeStep(action: KFunction<State>?) {
+    fun act() = timeStep(chooseAction(state, policy))
+    fun improvePolicy(temperature: Double = 1.0) {
+        val targetPolicy = createTargetPolicy(experiences, temperature)
+
+        policy = targetPolicy
+        println("New policy:\n $targetPolicy")
+    }
+
+    private fun timeStep(action: Action?) {
         if(action != null) {
             val nextState = action.call(task, state)
 
-            experiences.add(state.value to (action to nextState.reward))
+            experiences.add(state to (action to nextState.reward))
 
             state = nextState
             actions = state.getActions()
-
-            rewardValues.add(nextState.reward)
         }
     }
 
-    fun chooseAction(stateValue: StateValue = state.value): KFunction<State>? {
-        if(stateValue is State) {
-            throw Error("State passed to chooseAction")
-        }
+    private fun chooseAction(state: State, behaviourPolicy: Policy): Action? {
+        return if(behaviourPolicy[state.value] == null) {
+            val total = actions.size
+            behaviourPolicy[state.value] = actions.map {
+                it to (1.0 / total.toDouble())
+            }.toMap().toMutableMap()
 
-        var r = Random().nextDouble()
+            actions.random()
+        } else {
+            var r = Random().nextDouble()
+            var action: Action? = null
 
-        if(policy[stateValue] == null) {
-            policy[state.value] = mutableMapOf()
-            val normalProbability = 1 / actions.size.toDouble()
-            actions.forEach {
-                policy[state.value]!![it] = normalProbability
+            for (pair in behaviourPolicy[state.value]!!) {
+                r -= pair.value
+                if(r <= 0) {
+                    action = pair.key
+                    break
+                }
             }
-        }
 
-        for (pair in policy[stateValue]!!) {
-            r -= pair.value
-            if(r <= 0) {
-                return pair.key
-            }
+            action
         }
-        return null
     }
 
-    fun act() = timeStep(chooseAction(this.state.value))
+    private fun createTargetPolicy(episode: Episode, temperature: Double): Policy {
+        val stateActionValues: SAVDoubleMap =
+            episode.toStateActionMeanValueMap(discountFactor, targetPolicy = policy, basePolicy = policy)
+            .asStateActionDoubleMap()
 
-    fun mapStateToValue(episode: List<Pair<StateValue, Pair<KFunction<State>, Double>>> = experiences): Map<StateValue, Double> {
-        var returnValue = 0.0
-        val returns: MutableMap<StateValue, MutableList<Double>> = mutableMapOf()
+        val targetPolicy: Policy = mutableMapOf()
 
-        return episode.reversed().forEachIndexed { index, (stateValue, actionPair) ->
-            val (action, reward) = actionPair
-            returnValue = discountFactor.pow(index) * returnValue + reward
+        val e = 2.718281828459045235360287471352662497757247093699959574966
+        stateActionValues.forEach { (stateAction, value) ->
+            val (state, action) = stateAction
 
-            returns[stateValue]?.add(returnValue) ?: returns.put(stateValue, mutableListOf(returnValue))
-        }.let { returns.map { (stateValue, returns) -> stateValue to returns.average() }.toMap() }
+            targetPolicy.putIfAbsent(state.value, mutableMapOf())
+            targetPolicy[state.value]!![action] = (value)
+        }
+
+        return targetPolicy.map { (state, actionMap) ->
+            var total = 0.0
+            val finalMap = actionMap.map { (action, value) ->
+                val eValue = e.pow(value / temperature)
+                total += eValue
+                action to eValue
+            }.map { (action, eValue) ->
+                action to eValue / total
+            }
+
+            state to finalMap.toMap().toMutableMap()
+        }.toMap().toMutableMap()
     }
 }
