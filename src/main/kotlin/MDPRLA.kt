@@ -62,11 +62,12 @@ class MDPRLA(
 
     private fun createTargetPolicy(episode: Episode, temperature: Double): Policy {
         val stateActionValues: SAVDoubleMap =
-            episode.toStateActionMeanValueMap(discountFactor, targetPolicy = policy, basePolicy = policy)
+            episode.toStateActionWeightedValueMap(discountFactor, targetPolicy = policy, basePolicy = policy)
             .asStateActionDoubleMap()
 
         val targetPolicy: Policy = mutableMapOf()
 
+        // Soft-max
         val e = 2.718281828459045235360287471352662497757247093699959574966
         stateActionValues.forEach { (stateAction, value) ->
             val (state, action) = stateAction
