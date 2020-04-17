@@ -56,7 +56,7 @@ class RecyclerTask : Task {
         return RecyclerState(2, 0.0)
     }
 
-    override fun start() {
+    fun start() {
         println("Run for how many steps? (Default: 1000)")
         val stepsInput = readLine()
         val steps = if(stepsInput == "") {

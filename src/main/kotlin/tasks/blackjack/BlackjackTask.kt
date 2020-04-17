@@ -29,7 +29,7 @@ class BlackjackTask : Task {
         }
     }
 
-    override fun start() {
+    fun start() {
         var winCount = 0
         var bustCount = 0
         var underCount = 0
