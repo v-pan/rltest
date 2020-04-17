@@ -87,7 +87,7 @@ class BlackjackState(val cardList: List<Int>, override val reward: Double) : Sta
 }
 ```
 
-where `cardList` represents the current hand, and `totalCardValue(cardList: List<Int>)` returns an Int value for the hand. Consequently, many different hands may return the same value[\*]().
+where `cardList` represents the current hand, and `totalCardValue(cardList: List<Int>)` returns an Int value for the hand. Consequently, many different hands may return the same value[\*](#reducing-state-space).
 
  - Methods of the task may be passed to the `MDPRLA` instance through the `getActions()` method the associated `State`, whereupon they will be treated as actions. Actions are passed as a list to the `MDPRLA` using reflection.
 
