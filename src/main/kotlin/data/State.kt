@@ -1,12 +1,12 @@
 package data
 
-import kotlin.reflect.KFunction
+import Action
 
 abstract class State {
     abstract val value: Any
     abstract val reward: Double
 
-    abstract fun getActions(): List<KFunction<State>>
+    abstract fun getActions(): List<Action>
     override fun equals(other: Any?): Boolean {
         return if(other is State) {
             value == other.value

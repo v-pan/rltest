@@ -1,7 +1,7 @@
 package tasks.blackjack
 
+import Action
 import data.State
-import kotlin.reflect.KFunction
 
 /*
 We're keeping track of cards as Int, but it's not representative of their values in game
@@ -13,7 +13,7 @@ For example, values of 1 in the list are an ace, which can be 1 or 11 in game
 class BlackjackState(val cardList: List<Int>, override val reward: Double) : State() {
     override val value = totalCardValue(cardList)
 
-    override fun getActions(): List<KFunction<State>> {
+    override fun getActions(): List<Action> {
         return listOf(BlackjackTask::hit, BlackjackTask::stick)
     }
 
