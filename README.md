@@ -110,3 +110,13 @@ override fun getActions(): List<Action> {
  - Finally a task should call the `explore()`, `exploit()` and `improvePolicy(temperature: Double)` methods of the initialised `rla` when appropriate as described in [#Usage](#usage).
 
     `improvePolicy(temperature: Double)` takes a parameter `temperature` which controls how close to deterministic the policy is. The closer it is to 0, the more deterministic it becomes. As the temperature approaches infinity, the policy becomes increasingly normalised. By default the temperature is 1. In the future, this temperature will hopefully be controlled by the `MDPRLA` to provide a better balance between exploration and exploitation than is currently available.
+
+## Footnotes
+
+### Reducing state space
+
+> Consequently, many different hands may return the same value
+
+While this approach helps to keep memory usage down, it comes at the potential cost of performance. When deciding on how to represent a state's value, the impact of reducing a policy's complexity should be considered to inform the final decision.
+
+For instance, in the `BlackjackState` example used, the algorithm performs well at keeping its total hand value above 17, which it is penalised for sticking beneath, but still goes bust as often as before policy improvement. This is most likely because it cannot recognise any difference between hands with or without aces. A more effective representation may inform the algorithm of its total card value, as well as how many aces it has, to allow the algorithm to make more complex strategies and possibly improving its performance.
