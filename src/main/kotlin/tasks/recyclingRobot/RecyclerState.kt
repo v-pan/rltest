@@ -1,4 +1,4 @@
-package recyclingRobot
+package tasks.recyclingRobot
 
 import data.State
 import kotlin.reflect.KFunction

@@ -1,6 +1,5 @@
 import data.*
 import java.util.*
-import kotlin.math.pow
 import kotlin.reflect.KFunction
 
 typealias StateValue = Any
@@ -17,14 +16,26 @@ class MDPRLA(
     private var behaviourPolicy: Policy = mutableMapOf()
     private var targetPolicy: Policy? = null
     private val experiences: Episode = mutableListOf()
+    private var stateActionValueMap: MutableSAWVMap = mutableMapOf()
 
-    fun act() = timeStep(chooseAction(state, behaviourPolicy))
+    fun explore() = timeStep(chooseAction(state, behaviourPolicy))
+    fun exploit() = when(targetPolicy){
+        null -> {
+            println("No target policy has been trained.")
+        }
+        else -> {
+            timeStep(chooseAction(state, targetPolicy!!))
+        }
+    }
+
     fun improvePolicy(temperature: Double = 1.0) {
-        targetPolicy = experiences.toStateActionWeightedValueMap(
+        stateActionValueMap = experiences.toStateActionWeightedValueMap(
             discountFactor,
             targetPolicy = targetPolicy ?: behaviourPolicy,
-            basePolicy = behaviourPolicy
-        ).asStateActionDoubleMap().toPolicy(temperature)
+            basePolicy = behaviourPolicy,
+            stateActionValues = stateActionValueMap
+        )
+        targetPolicy = stateActionValueMap.asStateActionDoubleMap().toPolicy(temperature)
 
         println("New target policy:\n ${targetPolicy!!.map { (stateValue, actionPair) -> stateValue to actionPair.map { (action, value) -> action to value }.joinToString { (action, value) -> "${action.name}=$value" } }.joinToString { (stateValue, actionString) -> "$stateValue={$actionString}" }}")
     }
@@ -40,10 +51,10 @@ class MDPRLA(
         }
     }
 
-    private fun chooseAction(state: State, behaviourPolicy: Policy): Action? {
-        return if(behaviourPolicy[state.value] == null) {
+    private fun chooseAction(state: State, policy: Policy): Action? {
+        return if(policy[state.value] == null) {
             val total = actions.size
-            behaviourPolicy[state.value] = actions.map {
+            policy[state.value] = actions.map {
                 it to (1.0 / total.toDouble())
             }.toMap().toMutableMap()
 
@@ -52,7 +63,7 @@ class MDPRLA(
             var r = Random().nextDouble()
             var action: Action? = null
 
-            for (pair in behaviourPolicy[state.value]!!) {
+            for (pair in policy[state.value]!!) {
                 r -= pair.value
                 if(r <= 0) {
                     action = pair.key

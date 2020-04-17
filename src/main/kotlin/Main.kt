@@ -1,10 +1,7 @@
-import blackjack.BlackjackTask
-import recyclingRobot.RecyclerTask
+import tasks.blackjack.BlackjackTask
+import tasks.recyclingRobot.RecyclerTask
 
 fun main() {
-    val blackjack = BlackjackTask()
-    blackjack.run{
-        start()
-        rla.improvePolicy()
-    }
+//    BlackjackTask().start()
+    RecyclerTask().start()
 }

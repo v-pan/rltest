@@ -53,19 +53,14 @@ fun Episode.toStateActionWeightedValueMap(discountFactor: Double,
         val (action, reward) = actionPair
         val oldValue = oldStateValues[state to action]?.value ?: 0.0
 
-        returnValue = discountFactor.pow(index) * returnValue + reward
+        // TODO: Use BigDecimal to avoid NaNs?
+        returnValue = (discountFactor.pow(index) * returnValue) + reward
 
-//        if(targetPolicy !== basePolicy) {
         stateActionValues.putIfAbsent(state to action, SAWeightedValue(returnValue - oldValue, 0.0))
         stateActionValues[state to action]!!.totalWeight += weight
         stateActionValues[state to action]!! += (weight * (returnValue - oldValue)) / stateActionValues[state to action]!!.totalWeight
 
         weight *= targetPolicy[state.value]!![action]!! / basePolicy[state.value]!![action]!!
-//        } else {
-//            stateActionValues.putIfAbsent(state to action, SAWeightedValue(returnValue - oldValue, 1.0))
-//            stateActionValues[state to action]!!.totalWeight = 1.0
-//            stateActionValues[state to action]!! += (returnValue - oldValue)
-//        }
     }
 
     return stateActionValues

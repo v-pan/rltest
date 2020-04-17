@@ -1,4 +1,4 @@
-package blackjack
+package tasks.blackjack
 
 import data.State
 import kotlin.reflect.KFunction
