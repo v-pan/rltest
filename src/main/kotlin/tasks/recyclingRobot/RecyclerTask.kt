@@ -86,7 +86,6 @@ class RecyclerTask : Task {
         var lowSearchCount = 0
         var lowWaitCount = 0
         var outOfBatteryCount = 0
-        var highRechargeCount = 0
         var lowRechargeCount = 0
 
         for(i in 0 until steps) {

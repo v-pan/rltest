@@ -5,6 +5,7 @@ import Action
 abstract class State {
     abstract val value: Any
     abstract val reward: Double
+    abstract val terminal: Boolean
 
     abstract fun getActions(): List<Action>
     override fun equals(other: Any?): Boolean {

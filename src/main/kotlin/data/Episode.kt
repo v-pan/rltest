@@ -56,7 +56,7 @@ fun Episode.toStateActionWeightedValueMap(discountFactor: Double,
         // TODO: Use BigDecimal to avoid NaNs?
         returnValue = (discountFactor.pow(index) * returnValue) + reward
 
-        stateActionValues.putIfAbsent(state to action, SAWeightedValue(returnValue - oldValue, 0.0))
+        stateActionValues.putIfAbsent(state to action, SAWeightedValue(0.0, 0.0))
         stateActionValues[state to action]!!.totalWeight += weight
         stateActionValues[state to action]!! += (weight * (returnValue - oldValue)) / stateActionValues[state to action]!!.totalWeight
 

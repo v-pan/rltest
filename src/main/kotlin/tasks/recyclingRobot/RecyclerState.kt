@@ -3,7 +3,7 @@ package tasks.recyclingRobot
 import Action
 import data.State
 
-class RecyclerState(energyLevel: Int, override val reward: Double) : State() {
+class RecyclerState(energyLevel: Int, override val reward: Double, override val terminal: Boolean = false) : State() {
     override val value = energyLevel
 
     override fun getActions(): List<Action> {

@@ -9,10 +9,10 @@ typealias Policy = MutableMap<StateValue, MutableMap<Action, Double>>
 class MDPRLA(
     private val discountFactor: Double,
     private var state: State,
-    private val task: Task,
-    private var actions: List<Action> = state.getActions()
+    private val task: Task
 ) {
 
+    private var actions: List<Action> = state.getActions()
     private var behaviourPolicy: Policy = mutableMapOf()
     private var targetPolicy: Policy? = null
     private val experiences: Episode = mutableListOf()
@@ -37,7 +37,9 @@ class MDPRLA(
         )
         targetPolicy = stateActionValueMap.asStateActionDoubleMap().toPolicy(temperature)
 
-        println("New target policy:\n ${targetPolicy!!.map { (stateValue, actionPair) -> stateValue to actionPair.map { (action, value) -> action to value }.joinToString { (action, value) -> "${action.name}=$value" } }.joinToString { (stateValue, actionString) -> "$stateValue={$actionString}" }}")
+        println("New target policy:\n " +
+                targetPolicy!!.map { (stateValue, actionPair) -> stateValue to actionPair.map { (action, value) -> action to value }.joinToString { (action, value) -> "${action.name}=$value" } }.joinToString { (stateValue, actionString) -> "$stateValue={$actionString}" }
+        )
     }
 
     private fun timeStep(action: Action?) {

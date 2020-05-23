@@ -4,16 +4,16 @@ import MDPRLA
 import data.Task
 
 class BlackjackTask : Task {
-    override var rla = MDPRLA(0.5, BlackjackState(listOf((1 .. 13).random(), (1 .. 13).random()), 0.0), this)
+    override var rla = MDPRLA(0.5, BlackjackState(listOf((1 .. 13).random(), (1 .. 13).random()), 0.0, false), this)
     private var under = false
     private var bust = false
     private var won = false
 
     fun hit(state: BlackjackState): BlackjackState {
-        val newState = BlackjackState(state.cardList.plus((1..13).random()), 0.0)
+        val newState = BlackjackState(state.cardList.plus((1..13).random()), 0.0, false)
         return if(newState.totalCardValue() > 21) {
             bust = true
-            BlackjackState(listOf((1 .. 13).random(), (1 .. 13).random()), -1.0)
+            BlackjackState(listOf((1 .. 13).random(), (1 .. 13).random()), -1.0, terminal = true)
         } else {
             newState
         }
@@ -22,10 +22,10 @@ class BlackjackTask : Task {
     fun stick(state: BlackjackState): BlackjackState {
         return if(state.totalCardValue() > 17) {
             won = true
-            BlackjackState(listOf((1 .. 13).random(), (1 .. 13).random()), 1.0)
+            BlackjackState(listOf((1 .. 13).random(), (1 .. 13).random()), 1.0, terminal = true)
         } else {
             under = true
-            BlackjackState(listOf((1 .. 13).random(), (1 .. 13).random()), -1.0)
+            BlackjackState(listOf((1 .. 13).random(), (1 .. 13).random()), -1.0, terminal = true)
         }
     }
 
@@ -34,10 +34,12 @@ class BlackjackTask : Task {
         var bustCount = 0
         var underCount = 0
 
-        println("Play how many games? (default: 10000)")
+        val defaultGames = 1000
+
+        println("Play how many games? (default: $defaultGames)")
         val input = readLine()
         val games = if(input == "") {
-            10000
+            defaultGames
         } else {
             input!!.toInt()
         }
@@ -45,11 +47,26 @@ class BlackjackTask : Task {
         println("Playing...")
 
         for(i in 0 until games) {
-            rla.explore()
-            when {
-                bust -> { bust = false; bustCount++ }
-                under -> { under = false; underCount++ }
-                won -> { won = false; winCount++ }
+            var gameOver = false
+            while(!gameOver) {
+                rla.explore()
+                when {
+                    bust -> {
+                        bust = false
+                        bustCount++
+                        gameOver = true
+                    }
+                    under -> {
+                        under = false
+                        underCount++
+                        gameOver = true
+                    }
+                    won -> {
+                        won = false
+                        winCount++
+                        gameOver = true
+                    }
+                }
             }
         }
 

@@ -10,12 +10,10 @@ For example, values of 1 in the list are an ace, which can be 1 or 11 in game
     or Kings are 13 in the list, despite holding a value of 10 in game
  */
 
-class BlackjackState(val cardList: List<Int>, override val reward: Double) : State() {
+class BlackjackState(val cardList: List<Int>, override val reward: Double, override val terminal: Boolean) : State() {
     override val value = totalCardValue(cardList)
 
-    override fun getActions(): List<Action> {
-        return listOf(BlackjackTask::hit, BlackjackTask::stick)
-    }
+    override fun getActions() = listOf(BlackjackTask::hit, BlackjackTask::stick)
 
     fun totalCardValue(cards: List<Int> = cardList): Int {
         val aces = cards.count { it == 1 }
