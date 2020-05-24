@@ -4,7 +4,10 @@ import Action
 import Policy
 import kotlin.math.pow
 
-typealias Episode = MutableList<Pair<State, Pair<Action, Double>>>
+data class EpisodeEntry(val state: State, val action: Action, val reward: Double)
+typealias Episode = MutableList<EpisodeEntry>
+
+typealias OldEpisode = MutableList<Pair<State, Pair<Action, Double>>>
 typealias MutableSAWVMap = MutableMap<Pair<State, Action>, SAWeightedValue>
 typealias SAVDoubleMap = Map<Pair<State, Action>, Double>
 
@@ -40,9 +43,33 @@ fun MutableSAWVMap.asStateActionDoubleMap(): SAVDoubleMap {
     }.toMap()
 }
 
-fun Episode.toStateActionWeightedValueMap(discountFactor: Double,
-                                          targetPolicy: Policy, basePolicy: Policy,
-                                          stateActionValues: MutableSAWVMap = mutableMapOf()
+fun MutableSAWVMap.argMaxOf(state: State): Action {
+    var maxValue: Double? = null
+    var argMax: Action? = null
+
+    state.getActions().forEach {
+        putIfAbsent(state to it, SAWeightedValue(0.0, 0.0))
+    }
+
+    filter { it.key.first == state }.forEach { (stateAction, weightedValue) ->
+        val (_, action) = stateAction
+        if(maxValue != null) {
+            if(weightedValue.value > maxValue!!) {
+                maxValue = weightedValue.value
+                argMax = action
+            }
+        } else {
+            maxValue = weightedValue.value
+            argMax = action
+        }
+    }
+
+    return argMax!!
+}
+
+fun OldEpisode.toStateActionWeightedValueMap(discountFactor: Double,
+                                             targetPolicy: Policy, basePolicy: Policy,
+                                             stateActionValues: MutableSAWVMap = mutableMapOf()
 ): MutableSAWVMap {
 
     var returnValue = 0.0

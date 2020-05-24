@@ -36,7 +36,7 @@ class BlackjackTask : Task {
 
         val defaultGames = 1000
 
-        println("Play how many games? (default: $defaultGames)")
+        println("Play how many games / episodes? (default: $defaultGames)")
         val input = readLine()
         val games = if(input == "") {
             defaultGames
@@ -66,10 +66,14 @@ class BlackjackTask : Task {
                         winCount++
                         gameOver = true
                     }
+                    else -> {
+                        gameOver = false
+                    }
                 }
             }
         }
 
+        println(bustCount + underCount + winCount)
         println("Finished round 1")
         println("Won $winCount (${(winCount.toDouble() / games.toDouble()) * 100}%), " +
                 "bust $bustCount (${(bustCount.toDouble() / games.toDouble()) * 100}%), " +
@@ -82,7 +86,7 @@ class BlackjackTask : Task {
 
         while(acceptInput) when(readLine()!!.toUpperCase()) {
             "E" -> play(false)
-            "I" -> rla.improvePolicy()
+//            "I" -> rla.improvePolicy()
             "X" -> play(true)
             else -> acceptInput = false
         }
@@ -92,33 +96,40 @@ class BlackjackTask : Task {
         var winCount = 0
         var bustCount = 0
         var underCount = 0
-        val games = 10000
+        val games = 1000
 
         when(exploit) {
             false -> {
                 println("Exploring...")
                 for(i in 0 until games) {
-                    rla.explore()
-                    when {
-                        bust -> { bust = false; bustCount++ }
-                        under -> { under = false; underCount++ }
-                        won -> { won = false; winCount++ }
+                    var gameOver = false
+                    while(!gameOver) {
+                        rla.explore()
+                        when {
+                            bust -> { bust = false; bustCount++; gameOver = true }
+                            under -> { under = false; underCount++; gameOver = true }
+                            won -> { won = false; winCount++; gameOver = true }
+                        }
                     }
                 }
             }
             true -> {
                 println("Exploiting...")
                 for(i in 0 until games) {
-                    rla.exploit()
-                    when {
-                        bust -> { bust = false; bustCount++ }
-                        under -> { under = false; underCount++ }
-                        won -> { won = false; winCount++ }
+                    var gameOver = false
+                    while(!gameOver) {
+                        rla.exploit()
+                        when {
+                            bust -> { bust = false; bustCount++; gameOver = true }
+                            under -> { under = false; underCount++; gameOver = true }
+                            won -> { won = false; winCount++; gameOver = true }
+                        }
                     }
                 }
             }
         }
 
+        println(bustCount + underCount + winCount)
         println("Won $winCount (${(winCount.toDouble() / games.toDouble()) * 100}%), " +
                 "bust $bustCount (${(bustCount.toDouble() / games.toDouble()) * 100}%), " +
                 "lost $underCount (${(underCount.toDouble() / games.toDouble()) * 100}%) " +
