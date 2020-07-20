@@ -73,13 +73,14 @@ class BlackjackTask : Task {
             }
         }
 
-        println(bustCount + underCount + winCount)
+//        println(bustCount + underCount + winCount)
         println("Finished round 1")
         println("Won $winCount (${(winCount.toDouble() / games.toDouble()) * 100}%), " +
                 "bust $bustCount (${(bustCount.toDouble() / games.toDouble()) * 100}%), " +
                 "lost $underCount (${(underCount.toDouble() / games.toDouble()) * 100}%) " +
                 "of $games games")
-        println("Explore / Improve target policy / Exploit: [e/i/x]")
+        rla.printTrainingResults()
+        println("Explore / Exploit: [e/x]")
         println("Press any other key to exit")
 
         var acceptInput = true
@@ -134,5 +135,6 @@ class BlackjackTask : Task {
                 "bust $bustCount (${(bustCount.toDouble() / games.toDouble()) * 100}%), " +
                 "lost $underCount (${(underCount.toDouble() / games.toDouble()) * 100}%) " +
                 "of $games games")
+        rla.printTrainingResults()
     }
 }

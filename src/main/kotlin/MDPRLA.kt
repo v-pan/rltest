@@ -23,14 +23,7 @@ class MDPRLA(
     var stateActionValueMap: MutableSAWVMap = mutableMapOf()
 
     fun explore() = timeStep(chooseAction(state, behaviourPolicy))
-    fun exploit() = when(targetPolicy){
-        null -> {
-            println("No target policy has been trained.")
-        }
-        else -> {
-            timeStep(chooseAction(state, targetPolicy!!))
-        }
-    }
+    fun exploit() = timeStep(chooseAction(state, targetPolicy))
 
     fun printTrainingResults() {
         println("SAWVMap:\n " +
@@ -39,25 +32,10 @@ class MDPRLA(
                 targetPolicy.map { (stateValue, actionPair) -> stateValue to actionPair.map { (action, value) -> action to value }.joinToString { (action, value) -> "${action.name}=$value" } }.joinToString { (stateValue, actionString) -> "$stateValue={$actionString}" })
     }
 
-//    fun improvePolicy(temperature: Double = 1.0) {
-//        stateActionValueMap = episode.toStateActionWeightedValueMap(
-//            discountFactor,
-//            targetPolicy = targetPolicy ?: behaviourPolicy,
-//            basePolicy = behaviourPolicy,
-//            stateActionValues = stateActionValueMap
-//        )
-//        targetPolicy = stateActionValueMap.asStateActionDoubleMap().toPolicy(temperature)
-//
-//        println("New target policy:\n " +
-//                targetPolicy!!.map { (stateValue, actionPair) -> stateValue to actionPair.map { (action, value) -> action to value }.joinToString { (action, value) -> "${action.name}=$value" } }.joinToString { (stateValue, actionString) -> "$stateValue={$actionString}" }
-//        )
-//    }
-
     private fun timeStep(action: Action?) {
         if(action != null) {
             val nextState = action.call(task, state)
 
-//            episode.add(state to (action to nextState.reward))
             episode.add(EpisodeEntry(state, action, nextState.reward))
 
             if(nextState.terminal) {
@@ -87,13 +65,12 @@ class MDPRLA(
                         break
                     }
 
-                    weight *= 1 / behaviourPolicy[state.value]!![action]!!
+                    try {
+                        weight *= 1 / behaviourPolicy[state.value]!![action]!!
+                    } catch (e: KotlinNullPointerException) {
+                        throw KotlinNullPointerException("Policies do not have coverage!")
+                    }
                 }
-//                println("SAWVMap:\n " +
-//                        stateActionValueMap.map { (stateAction, weightedValue) -> stateAction to weightedValue.value }.joinToString { (stateAction, value) -> "${stateAction.first.value}: ${stateAction.second.name}=$value" })
-//                println("New target policy:\n " +
-//                    targetPolicy.map { (stateValue, actionPair) -> stateValue to actionPair.map { (action, value) -> action to value }.joinToString { (action, value) -> "${action.name}=$value" } }.joinToString { (stateValue, actionString) -> "$stateValue={$actionString}" })
-//                println()
 
                 episodes.add(episode)
                 episode = mutableListOf()
