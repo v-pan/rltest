@@ -5,25 +5,25 @@ import Policy
 import kotlin.math.pow
 
 typealias Episode = MutableList<Pair<State, Pair<Action, Double>>>
-typealias MutableSAWVMap = MutableMap<Pair<State, Action>, SAWeightedValue>
+typealias MutableSAWVMap = MutableMap<Pair<State, Action>, StateActionWeightedValue>
 typealias SAVDoubleMap = Map<Pair<State, Action>, Double>
 
-fun SAVDoubleMap.toPolicy(temperature: Double): Policy {
-    val e = 2.718281828459045235360287471352662497757247093699959574966
+const val E = 2.718281828459045235360287471352662497757247093699959574966
 
+fun SAVDoubleMap.toPolicy(temperature: Double): Policy {
     val targetPolicy: Policy = mutableMapOf()
 
     forEach { (stateAction, value) ->
         val (state, action) = stateAction
 
         targetPolicy.putIfAbsent(state.value, mutableMapOf())
-        targetPolicy[state.value]!![action] = (value)
+        targetPolicy[state.value]!![action] = value
     }
 
     return targetPolicy.map { (state, actionMap) ->
         var total = 0.0
         val finalMap = actionMap.map { (action, value) ->
-            val eValue = e.pow(value / temperature)
+            val eValue = E.pow(value / temperature)
             total += eValue
             action to eValue
         }.map { (action, eValue) ->
@@ -41,7 +41,8 @@ fun MutableSAWVMap.asStateActionDoubleMap(): SAVDoubleMap {
 }
 
 fun Episode.toStateActionWeightedValueMap(discountFactor: Double,
-                                          targetPolicy: Policy, basePolicy: Policy,
+                                          targetPolicy: Policy,
+                                          basePolicy: Policy,
                                           stateActionValues: MutableSAWVMap = mutableMapOf()
 ): MutableSAWVMap {
 
@@ -56,7 +57,7 @@ fun Episode.toStateActionWeightedValueMap(discountFactor: Double,
         // TODO: Use BigDecimal to avoid NaNs?
         returnValue = (discountFactor.pow(index) * returnValue) + reward
 
-        stateActionValues.putIfAbsent(state to action, SAWeightedValue(returnValue - oldValue, 0.0))
+        stateActionValues.putIfAbsent(state to action, StateActionWeightedValue(returnValue - oldValue, 0.0))
         stateActionValues[state to action]!!.totalWeight += weight
         stateActionValues[state to action]!! += (weight * (returnValue - oldValue)) / stateActionValues[state to action]!!.totalWeight
 

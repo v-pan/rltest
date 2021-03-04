@@ -30,7 +30,7 @@ class MDPRLA(
 
     fun improvePolicy(temperature: Double = 1.0) {
         stateActionValueMap = experiences.toStateActionWeightedValueMap(
-            discountFactor,
+            discountFactor = discountFactor,
             targetPolicy = targetPolicy ?: behaviourPolicy,
             basePolicy = behaviourPolicy,
             stateActionValues = stateActionValueMap
